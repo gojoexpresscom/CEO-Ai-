@@ -2,47 +2,265 @@
 <html>
 <head>
 <title>CEO AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-body { margin:0; background:#000; color:#fff; font-family:sans-serif; text-align:center; }
-.logo { font-weight:bold; font-size:24px; padding:20px; text-align:left; }
-h1 { font-size:48px; margin:10px 0 0; }
-p { color:#aaa; margin:5px 0; }
+* { box-sizing:border-box; }
+body { margin:0; background:#000; color:#fff; font-family:sans-serif; height:100vh; overflow:hidden; }
+.screen { display:none; height:100vh; flex-direction:column; }
+.active { display:flex; }
+
+/* AUTH SCREEN */
+#authScreen { justify-content:center; align-items:center; padding:20px; }
+.authBox { width:100%; max-width:340px; text-align:center; }
+.authBox h1 { font-size:44px; margin-bottom:30px; }
+.authBox input {
+  width:100%; padding:14px; margin:8px 0; border-radius:10px;
+  border:1px solid #333; background:#111; color:#fff; font-size:16px;
+}
+.authBtn {
+  width:100%; padding:14px; margin:8px 0; border-radius:10px;
+  border:none; font-size:16px; font-weight:bold; cursor:pointer;
+}
+.googleBtn { background:#fff; color:#000; }
+.emailBtn { background:#333; color:#fff; }
+.switchLink { color:#888; margin-top:15px; font-size:14px; }
+.errorMsg { color:#ff5555; font-size:14px; min-height:18px; }
+
+/* CHAT SCREEN */
+#chatScreen { justify-content:flex-start; }
+.topBar { display:flex; justify-content:space-between; align-items:center; padding:20px; }
+.logo { font-weight:bold; font-size:24px; }
+.menuBtn { background:none; border:none; color:#fff; font-size:24px; }
+.chatArea { flex:1; overflow-y:auto; padding:0 20px; }
+.chatArea h1 { font-size:44px; margin:10px 0 0; }
+.chatArea p.sub { color:#aaa; margin:5px 0; }
 .circle {
   width:220px; height:220px; border-radius:50%;
-  border:2px solid #fff; margin:40px auto;
+  border:2px solid #fff; margin:30px auto;
   display:flex; align-items:center; justify-content:center;
-  box-shadow:0 0 40px rgba(255,255,255,0.3);
+  box-shadow:0 0 40px rgba(255,255,255,0.3); font-size:50px;
 }
-.mic {
-  width:70px; height:70px; border-radius:50%;
-  background:#222; border:none; color:#fff; font-size:28px;
-  margin-top:20px;
+#chat { color:#eee; max-width:600px; margin:20px auto; padding:0 10px; line-height:1.6; white-space:pre-wrap; }
+.bottomBar { padding:15px 20px; }
+.mic { width:70px; height:70px; border-radius:50%; background:#222; border:none; color:#fff; font-size:28px; display:block; margin:0 auto 15px; }
+.inputRow { display:flex; background:#111; border-radius:30px; padding:12px 16px; }
+input#userInput { flex:1; background:none; border:none; color:#fff; font-size:16px; outline:none; }
+button.send { background:none; border:none; color:#fff; font-size:22px; }
+
+/* MENU */
+#menuScreen { justify-content:flex-start; padding:20px; }
+.menuHeader { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+.menuHeader h2 { margin:0; }
+.closeBtn { background:none; border:none; color:#fff; font-size:24px; }
+.menuItem {
+  background:#111; padding:16px; border-radius:12px; margin-bottom:12px;
+  display:flex; justify-content:space-between; align-items:center; cursor:pointer;
 }
-#chat { color:#ccc; min-height:40px; padding:0 20px; }
-.inputRow {
-  display:flex; margin:30px 20px;
-  background:#111; border-radius:30px; padding:10px 15px;
-}
-input { flex:1; background:none; border:none; color:#fff; font-size:16px; outline:none; }
-button.send { background:none; border:none; color:#fff; font-size:20px; }
+.menuItem span { font-size:16px; }
+
+/* HISTORY / PROFILE PANELS */
+.panel { padding:10px 0; overflow-y:auto; flex:1; }
+.historyItem { background:#111; padding:14px; border-radius:10px; margin-bottom:10px; }
+.historyItem .msgText { color:#ccc; font-size:14px; margin-top:5px; }
+.historyItem .actions { display:flex; gap:10px; margin-top:8px; }
+.historyItem button { background:#222; border:none; color:#fff; padding:6px 12px; border-radius:6px; font-size:13px; }
+.profileRow { background:#111; padding:16px; border-radius:12px; margin-bottom:12px; }
+.profileRow label { color:#888; font-size:12px; display:block; }
+.profileRow div.val { font-size:16px; margin-top:4px; }
+.signOutBtn { width:100%; padding:14px; background:#a33; border:none; color:#fff; border-radius:10px; font-size:16px; margin-top:20px; }
 </style>
 </head>
 <body>
-<div class="logo">CEO</div>
-<h1>Hello.</h1>
-<p>I'm CEO AI.</p>
-<p>How can I help you today?</p>
 
-<div class="circle"><div id="chat"></div></div>
-<button class="mic" onclick="startListening()">🎤</button>
+<!-- AUTH SCREEN -->
+<div id="authScreen" class="screen active">
+  <div class="authBox">
+    <h1>CEO</h1>
+    <button class="authBtn googleBtn" onclick="signInGoogle()">Continue with Google</button>
+    <input id="emailInput" type="email" placeholder="Email">
+    <input id="passInput" type="password" placeholder="Password">
+    <button class="authBtn emailBtn" id="emailActionBtn" onclick="handleEmailAuth()">Continue with Email</button>
+    <div class="errorMsg" id="authError"></div>
+    <div class="switchLink" id="switchMode" onclick="toggleMode()">Don't have an account? Sign up</div>
+  </div>
+</div>
 
-<div class="inputRow">
-  <input id="userInput" placeholder="Message CEO AI...">
-  <button class="send" onclick="sendMessage()">➤</button>
+<!-- CHAT SCREEN -->
+<div id="chatScreen" class="screen">
+  <div class="topBar">
+    <div class="logo">CEO</div>
+    <button class="menuBtn" onclick="showScreen('menuScreen')">☰</button>
+  </div>
+  <div class="chatArea">
+    <h1>Hello.</h1>
+    <p class="sub">I'm CEO AI.</p>
+    <p class="sub">How can I help you today?</p>
+    <div class="circle">⚪</div>
+    <div id="chat"></div>
+  </div>
+  <div class="bottomBar">
+    <button class="mic" onclick="startListening()">🎤</button>
+    <div class="inputRow">
+      <input id="userInput" placeholder="Message CEO AI...">
+      <button class="send" onclick="sendMessage()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- MENU SCREEN -->
+<div id="menuScreen" class="screen">
+  <div class="menuHeader">
+    <h2>Menu</h2>
+    <button class="closeBtn" onclick="showScreen('chatScreen')">✕</button>
+  </div>
+  <div class="menuItem" onclick="showScreen('chatScreen')"><span>AI Chat</span><span>›</span></div>
+  <div class="menuItem" onclick="openHistory()"><span>History</span><span>›</span></div>
+  <div class="menuItem" onclick="openProfile()"><span>Profile</span><span>›</span></div>
+</div>
+
+<!-- HISTORY SCREEN -->
+<div id="historyScreen" class="screen">
+  <div class="menuHeader">
+    <h2>History</h2>
+    <button class="closeBtn" onclick="showScreen('menuScreen')">✕</button>
+  </div>
+  <div class="panel" id="historyPanel"></div>
+</div>
+
+<!-- PROFILE SCREEN -->
+<div id="profileScreen" class="screen">
+  <div class="menuHeader">
+    <h2>Profile</h2>
+    <button class="closeBtn" onclick="showScreen('menuScreen')">✕</button>
+  </div>
+  <div class="panel">
+    <div class="profileRow">
+      <label>Email</label>
+      <div class="val" id="profileEmail">-</div>
+    </div>
+    <button class="signOutBtn" onclick="signOut()">Sign Out</button>
+  </div>
 </div>
 
 <script>
-const API_KEY = "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";
+const SUPABASE_URL = "https://fqzlexenoaifyewngzve.supabase.co";
+const SUPABASE_KEY = "sb_publishable_tyh_uBwA65P1jh3C4dWt6g_bLhlskTz";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const GROQ_KEY = "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";
+
+let isSignUp = false;
+let currentUser = null;
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function toggleMode() {
+  isSignUp = !isSignUp;
+  document.getElementById('emailActionBtn').innerText = isSignUp ? "Sign Up with Email" : "Continue with Email";
+  document.getElementById('switchMode').innerText = isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up";
+}
+
+async function signInGoogle() {
+  await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.href }
+  });
+}
+
+async function handleEmailAuth() {
+  const email = document.getElementById('emailInput').value;
+  const password = document.getElementById('passInput').value;
+  const errorEl = document.getElementById('authError');
+  errorEl.innerText = "";
+
+  if (!email || !password) {
+    errorEl.innerText = "Enter email and password.";
+    return;
+  }
+
+  let result;
+  if (isSignUp) {
+    result = await supabase.auth.signUp({ email, password });
+  } else {
+    result = await supabase.auth.signInWithPassword({ email, password });
+  }
+
+  if (result.error) {
+    errorEl.innerText = result.error.message;
+  } else if (isSignUp) {
+    errorEl.style.color = "#7fff7f";
+    errorEl.innerText = "Check your email to confirm your account.";
+  } else {
+    onLoginSuccess(result.data.user);
+  }
+}
+
+function onLoginSuccess(user) {
+  currentUser = user;
+  document.getElementById('profileEmail').innerText = user.email || "Google account";
+  showScreen('chatScreen');
+}
+
+async function signOut() {
+  await supabase.auth.signOut();
+  currentUser = null;
+  showScreen('authScreen');
+}
+
+async function checkSession() {
+  const { data } = await supabase.auth.getSession();
+  if (data.session) {
+    onLoginSuccess(data.session.user);
+  }
+}
+checkSession();
+
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' && session) {
+    onLoginSuccess(session.user);
+  }
+});
+
+function openHistory() {
+  const key = "ceoHistory_" + (currentUser ? currentUser.id : "guest");
+  const history = JSON.parse(localStorage.getItem(key) || "[]");
+  const panel = document.getElementById('historyPanel');
+  panel.innerHTML = "";
+  if (history.length === 0) {
+    panel.innerHTML = "<p style='color:#888'>No messages yet.</p>";
+  } else {
+    history.slice().reverse().forEach((item, i) => {
+      const realIndex = history.length - 1 - i;
+      const div = document.createElement('div');
+      div.className = "historyItem";
+      div.innerHTML = `
+        <div><strong>${item.you}</strong></div>
+        <div class="msgText">${item.ai}</div>
+        <div class="actions">
+          <button onclick="deleteHistoryItem(${realIndex})">Delete</button>
+        </div>`;
+      panel.appendChild(div);
+    });
+  }
+  showScreen('historyScreen');
+}
+
+function deleteHistoryItem(index) {
+  const key = "ceoHistory_" + (currentUser ? currentUser.id : "guest");
+  const history = JSON.parse(localStorage.getItem(key) || "[]");
+  history.splice(index, 1);
+  localStorage.setItem(key, JSON.stringify(history));
+  openHistory();
+}
+
+function openProfile() {
+  document.getElementById('profileEmail').innerText = currentUser ? currentUser.email || "Google account" : "-";
+  showScreen('profileScreen');
+}
 
 async function sendMessage() {
   const input = document.getElementById("userInput");
@@ -55,11 +273,14 @@ async function sendMessage() {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": "Bearer " + API_KEY
+      "Authorization": "Bearer " + GROQ_KEY
     },
     body: JSON.stringify({
       model: "llama-3.3-70b-versatile",
-      messages: [{ role: "user", content: text }]
+      messages: [
+        { role: "system", content: "You are a helpful voice assistant. Keep replies short, 2-4 sentences, plain conversational text, no markdown." },
+        { role: "user", content: text }
+      ]
     })
   });
 
@@ -67,6 +288,11 @@ async function sendMessage() {
   const reply = data.choices[0].message.content;
   document.getElementById("chat").innerText = reply;
   speak(reply);
+
+  const key = "ceoHistory_" + (currentUser ? currentUser.id : "guest");
+  const history = JSON.parse(localStorage.getItem(key) || "[]");
+  history.push({ you: text, ai: reply });
+  localStorage.setItem(key, JSON.stringify(history));
 }
 
 function speak(text) {
