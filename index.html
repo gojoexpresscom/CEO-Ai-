@@ -9,30 +9,34 @@ body { margin:0; background:#000; color:#fff; font-family:sans-serif; height:100
 .screen { display:none; height:100vh; flex-direction:column; }
 .active { display:flex; }
 
-#authScreen { justify-content:center; align-items:center; padding:20px; }
-.authBox { width:100%; max-width:340px; text-align:center; }
-.authBox h1 { font-size:56px; margin-bottom:8px; }
-.tagline { color:#888; margin-bottom:40px; font-size:15px; }
+#authScreen {
+  justify-content:flex-start; align-items:center; padding:60px 24px 30px;
+  background: radial-gradient(ellipse at center 15%, #1a1a1a 0%, #000 65%);
+}
+.logoBig { font-size:64px; font-weight:800; margin-top:60px; letter-spacing:1px; }
+.tagline { color:#777; font-size:15px; letter-spacing:2px; margin-top:14px; font-family:monospace; }
+.authSpacer { flex:1; }
+.authBox { width:100%; max-width:360px; }
 .authBox input {
-  width:100%; padding:14px; margin:8px 0; border-radius:10px;
-  border:1px solid #333; background:#111; color:#fff; font-size:16px;
+  width:100%; padding:16px; margin:8px 0; border-radius:30px;
+  border:1px solid #2a2a2a; background:#141414; color:#fff; font-size:16px;
 }
 .authBtn {
-  width:100%; padding:14px; margin:8px 0; border-radius:10px;
+  width:100%; padding:16px; margin:8px 0; border-radius:30px;
   border:none; font-size:16px; font-weight:bold; cursor:pointer;
 }
 .googleBtn { background:#fff; color:#000; }
-.emailBtn { background:#333; color:#fff; }
-.errorMsg { color:#ff5555; font-size:14px; min-height:20px; margin-top:10px; }
+.emailBtn { background:#1c1c1c; color:#fff; }
+.errorMsg { color:#ff5555; font-size:13px; min-height:18px; margin-top:8px; text-align:center; }
+.legal { color:#555; font-size:12px; text-align:center; margin-top:20px; line-height:1.6; }
+.legal b { color:#888; }
 
 #appScreen { justify-content:space-between; }
 .topBar { display:flex; justify-content:space-between; align-items:center; padding:20px 20px 0; }
 .logo { font-weight:bold; font-size:22px; }
-
 .tabContent { flex:1; overflow-y:auto; padding:0 20px; }
 .tab { display:none; height:100%; }
 .tab.active { display:block; }
-
 #tab-ai { display:none; flex-direction:column; align-items:center; text-align:center; padding-top:10px; }
 #tab-ai.active { display:flex; }
 #tab-ai h1 { font-size:44px; margin:10px 0 0; }
@@ -45,24 +49,19 @@ body { margin:0; background:#000; color:#fff; font-family:sans-serif; height:100
 }
 #chatReply { color:#eee; max-width:560px; padding:0 10px; line-height:1.6; white-space:pre-wrap; text-align:left; }
 .mic { width:64px; height:64px; border-radius:50%; background:#222; border:none; color:#fff; font-size:26px; margin:10px auto; display:block; }
-
 .historyItem { background:#111; padding:14px; border-radius:10px; margin-bottom:10px; text-align:left; }
 .historyItem .msgText { color:#ccc; font-size:14px; margin-top:5px; }
 .historyItem button { background:#222; border:none; color:#fff; padding:6px 12px; border-radius:6px; font-size:13px; margin-top:8px; }
-
 .serviceCard { background:#111; padding:16px; border-radius:12px; margin-bottom:12px; text-align:left; }
 .serviceCard h3 { margin:0 0 6px; font-size:16px; }
 .serviceCard p { margin:0; color:#999; font-size:13px; }
-
 .profileRow { background:#111; padding:16px; border-radius:12px; margin-bottom:12px; text-align:left; }
 .profileRow label { color:#888; font-size:12px; display:block; }
 .profileRow div.val { font-size:16px; margin-top:4px; }
 .signOutBtn { width:100%; padding:14px; background:#a33; border:none; color:#fff; border-radius:10px; font-size:16px; margin-top:10px; }
-
 .inputRow { display:flex; background:#111; border-radius:30px; padding:12px 16px; margin:10px 20px; }
 input#userInput { flex:1; background:none; border:none; color:#fff; font-size:16px; outline:none; }
 button.send { background:none; border:none; color:#fff; font-size:22px; }
-
 .bottomNav { display:flex; justify-content:space-around; padding:14px 0; border-top:1px solid #222; }
 .navBtn { background:none; border:none; color:#666; font-size:12px; display:flex; flex-direction:column; align-items:center; gap:4px; }
 .navBtn.active { color:#fff; }
@@ -72,20 +71,21 @@ button.send { background:none; border:none; color:#fff; font-size:22px; }
 <body>
 
 <div id="authScreen" class="screen active">
+  <div class="logoBig">CEO</div>
+  <div class="tagline">Understand your day_</div>
+  <div class="authSpacer"></div>
   <div class="authBox">
-    <h1>CEO</h1>
-    <p class="tagline">Your personal AI assistant</p>
-    <button class="authBtn googleBtn" onclick="signInGoogle()">Continue with Google</button>
+    <button class="authBtn googleBtn" id="googleBtn">Continue with Google</button>
     <input id="emailInput" type="email" placeholder="Email">
     <input id="passInput" type="password" placeholder="Password">
-    <button class="authBtn emailBtn" id="emailActionBtn" onclick="handleEmailAuth()">Continue with Email</button>
+    <button class="authBtn emailBtn" id="emailBtn">Continue with Email</button>
     <div class="errorMsg" id="authError">Loading...</div>
+    <div class="legal">By continuing you agree to <b>Terms</b> and<br><b>Privacy Policy</b></div>
   </div>
 </div>
 
 <div id="appScreen" class="screen">
   <div class="topBar"><div class="logo">CEO</div></div>
-
   <div class="tabContent">
     <div id="tab-ai" class="tab active">
       <h1>Hello.</h1>
@@ -94,40 +94,36 @@ button.send { background:none; border:none; color:#fff; font-size:22px; }
       <div class="circle">⚪</div>
       <div id="chatReply"></div>
     </div>
-
     <div id="tab-history" class="tab">
       <h2>History</h2>
       <div id="historyPanel"></div>
     </div>
-
     <div id="tab-services" class="tab">
       <h2>Services</h2>
       <div class="serviceCard"><h3>Voice Chat</h3><p>Talk to CEO AI using your microphone from the AI tab.</p></div>
       <div class="serviceCard"><h3>Chat History</h3><p>Every conversation is saved automatically to your account.</p></div>
       <div class="serviceCard"><h3>More coming soon</h3><p>Additional tools will appear here as they're added.</p></div>
     </div>
-
     <div id="tab-profile" class="tab">
       <h2>Profile</h2>
       <div class="profileRow"><label>Email</label><div class="val" id="profileEmail">-</div></div>
-      <button class="signOutBtn" onclick="signOut()">Sign Out</button>
+      <button class="signOutBtn" id="signOutBtn">Sign Out</button>
     </div>
   </div>
-
-  <button class="mic" onclick="startListening()">🎤</button>
+  <button class="mic" id="micBtn">🎤</button>
   <div class="inputRow">
     <input id="userInput" placeholder="Message CEO AI...">
-    <button class="send" onclick="sendMessage()">➤</button>
+    <button class="send" id="sendBtn">➤</button>
   </div>
-
   <div class="bottomNav">
-    <button class="navBtn active" id="nav-ai" onclick="switchTab('ai')"><span class="icon">◯</span><span>AI</span></button>
-    <button class="navBtn" id="nav-history" onclick="switchTab('history')"><span class="icon">🕐</span><span>History</span></button>
-    <button class="navBtn" id="nav-services" onclick="switchTab('services')"><span class="icon">▦</span><span>Services</span></button>
-    <button class="navBtn" id="nav-profile" onclick="switchTab('profile')"><span class="icon">☺</span><span>Profile</span></button>
+    <button class="navBtn active" id="nav-ai"><span class="icon">◯</span><span>AI</span></button>
+    <button class="navBtn" id="nav-history"><span class="icon">🕐</span><span>History</span></button>
+    <button class="navBtn" id="nav-services"><span class="icon">▦</span><span>Services</span></button>
+    <button class="navBtn" id="nav-profile"><span class="icon">☺</span><span>Profile</span></button>
   </div>
 </div>
 
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://fqzlexenoaifyewngzve.supabase.co";
 const SUPABASE_KEY = "sb_publishable_tyh_uBwA65P1jh3C4dWt6g_bLhlskTz";
@@ -135,53 +131,62 @@ const GROQ_KEY = "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";
 
 let supabase = null;
 let currentUser = null;
+const authError = document.getElementById('authError');
 
-function authFailLoad() {
-  document.getElementById('authError').innerText = "Couldn't load login system. Reload the page.";
+window.addEventListener('error', function(e) {
+  authError.style.color = "#ff5555";
+  authError.innerText = "Script error: " + e.message;
+});
+
+try {
+  if (!window.supabase) throw new Error("Supabase library did not load.");
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  authError.innerText = "";
+} catch (e) {
+  authError.style.color = "#ff5555";
+  authError.innerText = "Setup error: " + e.message;
 }
 
-function initApp() {
-  try {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    document.getElementById('authError').innerText = "";
-    checkSession();
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) onLoginSuccess(session.user);
-    });
-  } catch (e) {
-    authFailLoad();
-  }
-}
+document.getElementById('googleBtn').addEventListener('click', function() {
+  if (!supabase) { authError.innerText = "Not ready yet. Reload."; return; }
+  supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
+});
 
-async function signInGoogle() {
-  if (!supabase) { authFailLoad(); return; }
-  await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
-}
-
-async function handleEmailAuth() {
-  if (!supabase) { authFailLoad(); return; }
+document.getElementById('emailBtn').addEventListener('click', async function() {
+  if (!supabase) { authError.innerText = "Not ready yet. Reload."; return; }
   const email = document.getElementById('emailInput').value;
   const password = document.getElementById('passInput').value;
-  const errorEl = document.getElementById('authError');
-  errorEl.style.color = "#ff5555";
-  errorEl.innerText = "";
-
-  if (!email || !password) { errorEl.innerText = "Enter email and password."; return; }
+  authError.style.color = "#ff5555";
+  authError.innerText = "";
+  if (!email || !password) { authError.innerText = "Enter email and password."; return; }
 
   let result = await supabase.auth.signInWithPassword({ email, password });
-
   if (result.error) {
     result = await supabase.auth.signUp({ email, password });
     if (result.error) {
-      errorEl.innerText = result.error.message;
+      authError.innerText = result.error.message;
     } else {
-      errorEl.style.color = "#7fff7f";
-      errorEl.innerText = "Account created. Check your email to confirm.";
+      authError.style.color = "#7fff7f";
+      authError.innerText = "Account created. Check your email to confirm.";
     }
   } else {
     onLoginSuccess(result.data.user);
   }
-}
+});
+
+document.getElementById('signOutBtn').addEventListener('click', async function() {
+  if (supabase) await supabase.auth.signOut();
+  currentUser = null;
+  document.getElementById('appScreen').classList.remove('active');
+  document.getElementById('authScreen').classList.add('active');
+});
+
+document.getElementById('sendBtn').addEventListener('click', sendMessage);
+document.getElementById('micBtn').addEventListener('click', startListening);
+document.getElementById('nav-ai').addEventListener('click', () => switchTab('ai'));
+document.getElementById('nav-history').addEventListener('click', () => switchTab('history'));
+document.getElementById('nav-services').addEventListener('click', () => switchTab('services'));
+document.getElementById('nav-profile').addEventListener('click', () => switchTab('profile'));
 
 function onLoginSuccess(user) {
   currentUser = user;
@@ -190,17 +195,16 @@ function onLoginSuccess(user) {
   document.getElementById('appScreen').classList.add('active');
 }
 
-async function signOut() {
-  if (supabase) await supabase.auth.signOut();
-  currentUser = null;
-  document.getElementById('appScreen').classList.remove('active');
-  document.getElementById('authScreen').classList.add('active');
-}
-
 async function checkSession() {
   if (!supabase) return;
   const { data } = await supabase.auth.getSession();
   if (data.session) onLoginSuccess(data.session.user);
+}
+if (supabase) {
+  checkSession();
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) onLoginSuccess(session.user);
+  });
 }
 
 function switchTab(name) {
@@ -284,6 +288,5 @@ function startListening() {
   }
 }
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onload="initApp()" onerror="authFailLoad()"></script>
 </body>
 </html>
